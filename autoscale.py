@@ -2,11 +2,12 @@
 
 # Example script for CPU autoscaling of ProfitBricks Servers
 
-# On the servers runs a inetd service that publishes the Load Average values as
-# "Load: 0.01 0.03 0.02" line.
-# This script gets the load average value from TCP service periodically,
-# calculcates the CPU utilization and if the CPU utilization is bigger than a
-# threshold a CPU is hot plugged into the server via the ProfitBricks API.
+# On the servers runs a TCP inetd service that sends to the client the load
+# average in the format "Load: 0.01 0.03 0.02".
+# This script retrieves the load average value from the inetd service
+# periodically, calculcates the CPU utilization and if the CPU utilization is
+# bigger than a threshold a CPU is hot plugged into the server via the
+# ProfitBricks API.
 
 import logging
 import datetime
@@ -128,6 +129,8 @@ class Server(object):
 
     @property
     def core_utilization(self):
+        if not self.load:
+            return None
         return self.load_avg / self.cores * 100
 
     def _wait_for_dc_state(self, state):
@@ -169,11 +172,12 @@ if __name__ == "__main__":
                         "\tCore Utilization: %s%%" %
                         (s.hostname, s.ip, s.cores, MAX_CORES, s.load_avg,
                          s.core_utilization))
-            if s.core_utilization > CPU_UTILIZATION_THRESHOLD:
+            if (s.core_utilization and
+                    s.core_utilization > CPU_UTILIZATION_THRESHOLD):
                 s.add_core()
             logger.info("Server %s (%s)\n\tCores: %s/%s\n\tLoad Avg.: %s\n"
                         "\tCore Utilization: %s%%" %
                         (s.hostname, s.ip, s.cores, MAX_CORES, s.load_avg,
                          s.core_utilization))
             logger.info("---------------")
-            time.sleep(5)
+        time.sleep(5)
