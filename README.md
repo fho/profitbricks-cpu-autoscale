@@ -1,12 +1,13 @@
 profitbricks-cpu-autoscale
 ==========================
-Example script for CPU autoscaling of ProfitBricks Servers.
+This repository contains a script to demonstrate the idea of automatically
+upscale the number of cores of ProfitBricks VMs depending on it's load.
 
-On the servers runs a TCP inetd service that sends to the client the load                                                                                                   
-average in the format "Load: 0.01 0.03 0.02".                                                                                                                               
-This script retrieves the load average value from the inetd service                                                                                                         
-periodically, calculcates the CPU utilization and if the CPU utilization is                                                                                                 
-bigger than a threshold an additional CPU core is hot plugged into the server via the                                                                                                        
-ProfitBricks API.                                                                                                                                                           
-                        
+The autoscale.py scripts periodically queries retrieves the load average of the
+VMs from an inetd service. If the load becomes bigger than a defined maxium an
+additional core is added to the VM via the ProfitBricks API.
 
+Prerequiste
+-----------
+* Add a inetd service that runs the load.sh script on TCP port 777
+* Configure the variables in autoscale.py to accord to your setup
